@@ -194,21 +194,9 @@ def descriere(aplicatii, product_details, cod_produs):
         """
     return descriere
 
-
-workbook = xlsxwriter.Workbook("C:\\Users\\Gh0sT\\Desktop\\WORKBOOK\\LESJOFORS.xlsx")
-worksheet = workbook.add_worksheet()
-worksheet.write(0, 0, "TITLU")
-worksheet.write(0, 1, "CATEGORIE")
-worksheet.write(0, 2, "DESCRIERE")
-worksheet.write(0, 3, "MONEDA")
-worksheet.write(0, 4, "PRET")
-worksheet.write(0, 5, "CANTITATE")
-worksheet.write(0, 6, "URL_POZA")
-workbook.close()
-directory = "C:\\Users\\Gh0sT\\Desktop\\HTML_LESJOFORS"
-row = 1
+adauga_excel = []
+directory = "C:\\Users\\HP\\Desktop\\HTML_LESJOFORS"
 for html_file in os.listdir(directory):
-    print(row)
     cod_produs = html_file.replace(".html", "")
     print(cod_produs)
     html = f"{directory}\\{html_file}"
@@ -225,15 +213,28 @@ for html_file in os.listdir(directory):
     oem_equivalent = product_details["oem_equivalent"]
     for key, value in aplicatii_produs.items():
         for val in value:
-            titlu = f"Arc suspensie {pozitie_montare} {pozitie_fixare} - {key} {' '.join(val)}  LESJOFORS {cod_produs}"
-            worksheet.write(row, 0, titlu)
-            worksheet.write(row, 1, "Arc spiral")
-            worksheet.write(row, 2, descriere_anunt)
-            worksheet.write(row, 3, "RON")
-            worksheet.write(row, 4, pret)
-            worksheet.write(row, 5, "1")
-            worksheet.write(row, 6, "https://ibb.co/BLQc2ky")
-            row += 1
+            titlu = f"Arc suspensie {pozitie_montare} {pozitie_fixare} {key} {' '.join(val)}  LESJOFORS {cod_produs}"
+            adauga_excel.append([titlu, "Arcuri auto", descriere_anunt, "RON", pret, "1", "https://i.ibb.co/jhQbkty/poza-lesjofors.jpg"])
 
-
+workbook = xlsxwriter.Workbook("C:\\Users\\HP\\Desktop\\WORKBOOK\\LESJOFORS.xlsx")
+worksheet = workbook.add_worksheet("Sheet1")
+worksheet.write(0, 0, "TITLU")
+worksheet.write(0, 1, "CATEGORIE")
+worksheet.write(0, 2, "DESCRIERE")
+worksheet.write(0, 3, "MONEDA")
+worksheet.write(0, 4, "PRET")
+worksheet.write(0, 5, "CANTITATE")
+worksheet.write(0, 6, "URL_POZA")
+row = 1
+for car in adauga_excel:
+    print(row)
+    worksheet.write(row, 0, car[0])
+    worksheet.write(row, 1, car[1])
+    worksheet.write(row, 2, car[2])
+    worksheet.write(row, 3, car[3])
+    worksheet.write(row, 4, car[4])
+    worksheet.write(row, 5, car[5])
+    worksheet.write(row, 6, car[6])
+    row += 1
+workbook.close()
 
