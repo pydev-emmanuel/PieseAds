@@ -1,72 +1,28 @@
 import os
 import xlsxwriter
+from openpyxl import load_workbook
 from bs4 import BeautifulSoup as soup
 
 
-directory = "C:\\Users\\Gh0sT\\Desktop\\HTML_LESJOFORS"
-
-# for html_file in os.listdir(directory):
-#     # print(html_file)
-
-
-def product_data(html_file):
+def product_data(html_file, code):
+    product_details = {
+    }
+    price_bardi = None
+    price_workbook = load_workbook("C:\\Users\\Gh0sT\\Desktop\\work_LUK_flywheel\\volante_LUK.xlsx")
+    price_worksheet = price_workbook["Sheet1"]
+    code_column = price_worksheet["A"]
+    code_column_list = [code_column[x].value for x in range(len(code_column))]
+    price_column = price_worksheet["B"]
+    price_column_list = [price_column[x].value for x in range(len(price_column))]
+    for x in code_column_list:
+        if int(code) == int(x):
+            price_bardi = price_column_list[code_column_list.index(x)]
+            print(price_bardi)
+    product_details["price"] = price_bardi
     oem_equivalent = []
     html = open(html_file, "r")
     contents = html.read()
     bs_content = soup(contents, "lxml")
-    product_details = {
-    }
-    pozitie_montare = None
-    pozitie_fixare = None
-    lungime = None
-    grosime = None
-    diametru = None
-    greutate = None
-    intercar_price = bs_content.find_all("div", class_="quantity__amount")[1].text
-    try:
-        price = float(intercar_price) - float(intercar_price)*5/100
-    except ValueError:
-        price = intercar_price
-    price = int(price)
-    for tag in bs_content.find_all("td", class_="datatable__item datatable__item--wrapped"):
-        if "Front" in tag.text:
-            pozitie_montare = "FATA"
-        elif "Rear" in tag.text:
-            pozitie_montare = "SPATE"
-    fixare = bs_content.find_all("a", class_="productfeatures__linkfeature")
-    try:
-        pozitie_check = f"{fixare[1].text} {fixare[2].text}"
-        if "eft" and "ight" in pozitie_check:
-            pozitie_fixare = "STANGA / DREAPTA"
-        elif "eft" in pozitie_check:
-            pozitie_fixare = "STANGA"
-        elif "ight" in pozitie_check:
-            pozitie_fixare = "DREAPTA"
-    except IndexError:
-        pozitie_fixare = None
-    except TypeError:
-        pozitie_fixare = None
-    try:
-        for tag in bs_content.find_all(class_="datatable__item"):
-            if "Length" in tag.text:
-                lungime = tag.findNext("td").a.text
-                lungime = lungime.replace("\n", "")
-                lungime = lungime.strip()
-        for tag in bs_content.find_all(class_="datatable__item"):
-            if "Thickness" in tag:
-                grosime = tag.findNext("td").a.text
-                grosime = grosime.replace("\n", "")
-                grosime = grosime.strip()
-        for tag in bs_content.find_all(class_="datatable__item"):
-            if "Outer diameter" in tag:
-                diametru = tag.findNext("td").a.text
-                diametru = diametru.replace("\n", "")
-                diametru = diametru.strip()
-        for tag in bs_content.find_all(class_="datatable__item"):
-            if "Weight" in tag:
-                greutate = tag.findNext("td").span.span.text
-    except AttributeError:
-        pass
     for tag in bs_content.find_all("div", class_="refnumbers__listheader"):
         if "OEM part number equivalent" in tag.text:
             check = tag.findNext("div").ul
@@ -74,17 +30,15 @@ def product_data(html_file):
         for oem_tag in check.find_all("li", class_="refnumbers__item"):
             oem_equivalent.append(f"{oem_tag.find('span', class_='refnumbers__manufacturer').text} - {oem_tag.find('span', class_='refnumbers__refnumber').text}")
     except UnboundLocalError:
-        oem_equivalent = []
+        pass
     except AttributeError:
         pass
-    product_details["pret"] = price
-    product_details["pozitie_montare"] = pozitie_montare
-    product_details["pozitie_fixare"] = pozitie_fixare
-    product_details["lungime"] = lungime
-    product_details["grosime"] = grosime
-    product_details["diametru"] = diametru
-    product_details["greutate"] = f"{greutate} kg"
     product_details["oem_equivalent"] = oem_equivalent
+    img_html = open(f"C:\\Users\\Gh0sT\\Desktop\\work_LUK_flywheel\\volante_LUK_photo\\{code}.html", "r")
+    img_contents = img_html.read()
+    img_bs_content = soup(img_contents, "lxml")
+    img_src = img_bs_content.find("img", class_="ng-star-inserted loaded")["src"]
+    product_details["img_src"] = img_src
     return product_details
 
 
@@ -155,12 +109,6 @@ def product_aplicatii(html_file):
 
 
 def descriere(aplicatii, product_details, cod_produs):
-    pozitie_montare = product_details["pozitie_montare"]
-    pozitie_fixare = product_details["pozitie_fixare"]
-    lungime = product_details["lungime"]
-    grosime = product_details["grosime"]
-    diametru = product_details["diametru"]
-    greutate = product_details["greutate"]
     oem_equivalent = product_details["oem_equivalent"]
     tabel_compatibilitate = []
     tabel_echivalente = []
@@ -173,17 +121,7 @@ def descriere(aplicatii, product_details, cod_produs):
         ech_string = " ".join(ech)
         tabel_echivalente.append(f"<div><b>{ech_string}</b></div>")
     tabel_echivalente = " ".join(tabel_echivalente)
-    descriere = f"""<h2>Arc suspensie LESJOFORS {cod_produs}</h2><br>
-        <div><br></div>
-        <div><b>Se pot trimite poze cu piesa la cerere</b></div>
-        <div><b>Piesa in stoc</b></div>
-        <h3><u>Informatii produs:</u></h3>
-        <div><b>Pozitie montare: {pozitie_montare}</b></div>
-        <div><b>Pozitie fixare: {pozitie_fixare}</b></div>
-        <div><b>Lungime: {lungime}</b></div>
-        <div><b>Grosime: {grosime}</b></div>
-        <div><b>Diametru exterior: {diametru}</b></div>
-        <div><b>Greutate: {greutate}</b></div>
+    descriere = f"""<h2>Volanta cu masa dubla LUK {cod_produs}</h2><br>
         <div><br></div>
         <h3><u>Masini compatibile:</u></h3>
         {tabel_compatibilitate}
@@ -195,28 +133,23 @@ def descriere(aplicatii, product_details, cod_produs):
     return descriere
 
 adauga_excel = []
-directory = "C:\\Users\\HP\\Desktop\\HTML_LESJOFORS"
+directory = "C:\\Users\\Gh0sT\\Desktop\\work_LUK_flywheel\\volante_LUK_intercars"
 for html_file in os.listdir(directory):
     cod_produs = html_file.replace(".html", "")
     print(cod_produs)
     html = f"{directory}\\{html_file}"
-    product_details = product_data(html)
+    product_details = product_data(html, cod_produs)
     aplicatii_produs = product_aplicatii(html)
     descriere_anunt = descriere(aplicatii_produs, product_details, cod_produs)
-    pret = product_details["pret"]
-    pozitie_montare = product_details["pozitie_montare"]
-    pozitie_fixare = product_details["pozitie_fixare"]
-    lungime = product_details["lungime"]
-    grosime = product_details["grosime"]
-    diametru = product_details["diametru"]
-    greutate = product_details["greutate"]
     oem_equivalent = product_details["oem_equivalent"]
+    img_src = product_details["img_src"]
+    price = product_details["price"]
     for key, value in aplicatii_produs.items():
         for val in value:
-            titlu = f"Arc suspensie {pozitie_montare} {pozitie_fixare} {key} {' '.join(val)}  LESJOFORS {cod_produs}"
-            adauga_excel.append([titlu, "Arcuri auto", descriere_anunt, "RON", pret, "1", "https://i.ibb.co/jhQbkty/poza-lesjofors.jpg"])
+            titlu = f"Volanta {key} {' '.join(val)}  LUK {cod_produs}"
+            adauga_excel.append([titlu, "Volanta", descriere_anunt, "RON", price, "1", img_src])
 
-workbook = xlsxwriter.Workbook("C:\\Users\\HP\\Desktop\\WORKBOOK\\LESJOFORS.xlsx")
+workbook = xlsxwriter.Workbook("C:\\Users\\Gh0sT\\Desktop\\WORKBOOK\\volante_LUK.xlsx")
 worksheet = workbook.add_worksheet("Sheet1")
 worksheet.write(0, 0, "TITLU")
 worksheet.write(0, 1, "CATEGORIE")

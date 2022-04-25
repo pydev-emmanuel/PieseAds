@@ -8,7 +8,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from time import sleep
 from openpyxl import load_workbook
 
-workbook = load_workbook("C:\\Users\\HP\\Desktop\\LESJOFORS.xlsx")
+workbook = load_workbook("C:\\Users\\Gh0sT\\Desktop\\volante_LUK.xlsx")
 worksheet = workbook["Sheet1"]
 column = worksheet["A"]
 column_list = [column[x].value for x in range(len(column))]
