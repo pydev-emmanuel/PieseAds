@@ -8,26 +8,25 @@ def product_data(html_file, code):
     product_details = {}
     price_bardi = None
     price_intercar = None
-    price_workbook = load_workbook("C:\\Users\\Gh0sT\\Desktop\\WORK\\arcuri_LESJOFORS\\arcuri_LESJOFORS.xlsx")
+    price_workbook = load_workbook("C:\\Users\\HP\\Desktop\\WORK\\RULMENTI\\rulmenti_FAG\\rulmenti_FAG.xlsx")
     price_worksheet = price_workbook["Sheet1"]
     code_column = price_worksheet["A"]
     code_column_list = [code_column[x].value for x in range(len(code_column))]
-    # price_column = price_worksheet["B"]
-    # price_column_list = [price_column[x].value for x in range(len(price_column))]
-    # for x in code_column_list:
-    #     if int(code) == int(x):
-    #         price_bardi = price_column_list[code_column_list.index(x)]
-    #         print(price_bardi)
-    # product_details["price"] = price_bardi
+    price_column = price_worksheet["B"]
+    price_column_list = [price_column[x].value for x in range(len(price_column))]
+    for x in code_column_list:
+        if int(code) == int(x):
+            price_bardi = price_column_list[code_column_list.index(x)]
+    product_details["price"] = price_bardi
     oem_equivalent = []
     html = open(html_file, "r")
     contents = html.read()
     bs_content = soup(contents, "lxml")
-    price = bs_content.find(class_="quantity quantity--pricesmall productpricetoggle__gross productpricetoggle__wholesale js-product-wholesale-toggle").findNext("div").text
-    price = int(float(price))
-    price_intercar = price - (price/100)*10
-    price_intercar = int(price_intercar)
-    product_details["price"] = price_intercar
+    # price = bs_content.find(class_="quantity quantity--pricesmall productpricetoggle__gross productpricetoggle__wholesale js-product-wholesale-toggle").findNext("div").text
+    # price = int(float(price))
+    # price_intercar = price - (price/100)*10
+    # price_intercar = int(price_intercar)
+    # product_details["price"] = price_intercar
     try:
         for tag in bs_content.find_all("li", class_="refnumbers__item"):
             if tag.find('span', class_='refnumbers__manufacturer').text == "Inter Cars cross reference":
@@ -147,7 +146,7 @@ def descriere(aplicatii, product_details, cod_produs):
         ech_string = "".join(ech)
         tabel_echivalente.append(f"<div><b>{ech_string}</b></div>")
     tabel_echivalente = " ".join(tabel_echivalente)
-    descriere = f"""<h2>Arc suspensie LESJOFORS {cod_produs}</h2><br>
+    descriere = f"""<h2>Set rulment roata FAG - {cod_produs}</h2><br>
         <div><br></div>
         <h3><u>Masini compatibile:</u></h3>
         {tabel_compatibilitate}
@@ -159,7 +158,7 @@ def descriere(aplicatii, product_details, cod_produs):
     return descriere
 
 adauga_excel = []
-directory = "C:\\Users\\Gh0sT\\Desktop\\WORK\\arcuri_LESJOFORS\\intercar"
+directory = "C:\\Users\\HP\\Desktop\\WORK\\RULMENTI\\rulmenti_FAG\\intercar"
 for html_file in os.listdir(directory):
     cod_produs = html_file.replace(".html", "")
     print(cod_produs)
@@ -171,10 +170,10 @@ for html_file in os.listdir(directory):
     img_src = product_details["img_src"]
     price = product_details["price"]
     for key in aplicatii_produs.keys():
-        titlu = f"Arc suspenise {key}  LESJOFORS {cod_produs}"
-        adauga_excel.append([titlu, "Arc spiral", descriere_anunt, "RON", price, "1", img_src])
+        titlu = f"Rulment roata {key}  FAG {cod_produs}"
+        adauga_excel.append([titlu, "Rulmenti", descriere_anunt, "RON", price, "1", img_src])
 
-workbook = xlsxwriter.Workbook("C:\\Users\\Gh0sT\\Desktop\\WORKBOOK\\arcuri_LESJOFORS.xlsx")
+workbook = xlsxwriter.Workbook("C:\\Users\\HP\\Desktop\\WORKBOOK\\rulmenti_FAG.xlsx")
 worksheet = workbook.add_worksheet("Sheet1")
 worksheet.write(0, 0, "TITLU")
 worksheet.write(0, 1, "CATEGORIE")
